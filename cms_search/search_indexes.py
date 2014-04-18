@@ -29,6 +29,7 @@ except ImportError:
 
 from haystack import indexes, site
 
+from cms.cms_toolbar import CMSToolbar
 from cms.models.pluginmodel import CMSPlugin
 
 from cms_search import models as proxy_models
@@ -72,6 +73,7 @@ def page_index_factory(language_code):
                 # Needed for plugin rendering.
                 request.current_page = None
                 request.user = AnonymousUser()
+                request.toolbar = CMSToolbar(request)
                 self.prepared_data = super(_PageIndex, self).prepare(obj)
                 plugins = CMSPlugin.objects.filter(language=language_code, placeholder__in=obj.placeholders.all())
                 text = u''

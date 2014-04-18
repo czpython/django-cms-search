@@ -2,6 +2,7 @@ import re
 
 from django.conf import settings
 from django.core.exceptions import ImproperlyConfigured
+from django.contrib.auth.models import AnonymousUser
 from django.contrib.sites.models import Site
 from django.db.models import Q
 from django.db.models.query import EmptyQuerySet
@@ -64,9 +65,13 @@ def page_index_factory(language_code):
             try:
                 if current_languge != self._language:
                     activate(self._language)
-                request = rf.get("/")
+                request_factory = RequestFactory(HTTP_HOST=settings.ALLOWED_HOSTS[0])
+                request = request_factory.get("/")
                 request.session = {}
                 request.LANGUAGE_CODE = self._language
+                # Needed for plugin rendering.
+                request.current_page = None
+                request.user = AnonymousUser()
                 self.prepared_data = super(_PageIndex, self).prepare(obj)
                 plugins = CMSPlugin.objects.filter(language=language_code, placeholder__in=obj.placeholders.all())
                 text = u''
